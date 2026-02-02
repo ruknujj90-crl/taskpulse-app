@@ -3,43 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskPulse Dashboard</title>
+    <title>TaskPulse Pro Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; text-align: center; margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0F172A; color: white; margin: 0; padding: 15px; }
         .container { max-width: 400px; margin: auto; }
-        .card { background: #1e293b; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #334155; }
-        .balance-box { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .balance-text { font-size: 28px; font-weight: bold; }
-        .btn { background: #10b981; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-withdraw { background: #6366f1; }
+        .card { background: #1E293B; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #334155; text-align: center; }
+        .balance-box { background: linear-gradient(135deg, #6366F1, #4F46E5); }
+        .balance-text { font-size: 32px; font-weight: bold; margin: 10px 0; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .stat-item { background: #0F172A; padding: 10px; border-radius: 10px; font-size: 13px; }
+        .btn { background: #10B981; color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-premium { background: #F59E0B; }
+        .btn-withdraw { background: #EF4444; }
+        #ad-view { display: none; background: #000; padding: 30px; border-radius: 15px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card balance-box">
-            <p>আপনার মোট আয়</p>
-            <div class="balance-text">৳ ০.০০</div>
-        </div>
-        
-        <div class="card">
-            <p>বিজ্ঞাপন দেখে আয় করুন (সীমা: ১০/১০)</p>
-            <button class="btn" onclick="alert('বিজ্ঞাপন লোড হচ্ছে...')">বিজ্ঞাপন দেখুন</button>
-        </div>
-
-        <div class="card">
-            <p>রেফার করে আয় করুন</p>
-            <button class="btn btn-withdraw" onclick="alert('আপনার রেফার লিঙ্ক কপি করুন')">রেফার লিঙ্ক</button>
+            <p>বর্তমান ব্যালেন্স</p>
+            <div class="balance-text">৳ <span id="balance">0.00</span></div>
+            <div id="status-tag" style="background: #ffffff33; padding: 5px 15px; border-radius: 50px; font-size: 12px; display: inline-block;">Free Member</div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">রেফার: <span id="refer-count">0</span>/20</div>
+                <div class="stat-item">আয়: <span id="member-type">Normal</span></div>
+            </div>
         </div>
 
         <div class="card">
-            <button class="btn btn-withdraw" style="background: #ef4444;" onclick="alert('নূন্যতম ১০০০ টাকা প্রয়োজন')">টাকা উত্তোলন (Withdraw)</button>
+            <p>বিজ্ঞাপন দেখুন (প্রতিটি ১০-২০৳)</p>
+            <button class="btn" onclick="startAd()">AD দেখুন</button>
+            <div id="ad-view">
+                <p>বিজ্ঞাপন লোড হচ্ছে... <br><span id="timer" style="font-size: 24px; font-weight: bold;">10</span> সেকেন্ড</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <p>চ্যানেল জয়েন বোনাস (২০৳)</p>
+            <button class="btn" style="background: #3B82F6;" onclick="joinChannel()">জয়েন করুন</button>
+        </div>
+
+        <div class="card">
+            <p>রেফার বোনাস: ৬০-১২০৳</p>
+            <button class="btn" style="background: #8B5CF6;" onclick="addRefer()">বন্ধু ইনভাইট করুন</button>
+        </div>
+
+        <div class="card">
+            <p>ইনকাম ডাবল করতে চান?</p>
+            <button class="btn btn-premium" onclick="openDeposit()">Premium মেম্বারশিপ (ডিপোজিট)</button>
+        </div>
+
+        <div class="card">
+            <button class="btn btn-withdraw" onclick="withdraw()">টাকা উত্তোলন (Withdraw)</button>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+
+        let balance = 0;
+        let refers = 0;
+        let isPremium = false;
+        let channelJoined = false;
+
+        function updateUI() {
+            document.getElementById('balance').innerText = balance.toFixed(2);
+            document.getElementById('refer-count').innerText = refers;
+        }
+
+        function startAd() {
+            document.getElementById('ad-view').style.display = 'block';
+            let sec = 10;
+            let timer = setInterval(() => {
+                sec--;
+                document.getElementById('timer').innerText = sec;
+                if(sec <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('ad-view').style.display = 'none';
+                    let earn = isPremium ? 20 : 10;
+                    balance += earn;
+                    updateUI();
+                    alert("সাফল্যের সাথে বিজ্ঞাপন দেখেছেন! আপনি পেয়েছেন " + earn + " টাকা।");
+                }
+            }, 1000);
+        }
+
+        function joinChannel() {
+            if(!channelJoined) {
+                alert("আমাদের টেলিগ্রাম চ্যানেলে জয়েন করুন।");
+                balance += 20;
+                channelJoined = true;
+                updateUI();
+            } else {
+                alert("আপনি ইতিমধ্যে বোনাস নিয়েছেন!");
+            }
+        }
+
+        function addRefer() {
+            refers += 1;
+            let bonus = isPremium ? 120 : 60;
+            balance += bonus;
+            updateUI();
+            alert("সফল রেফার! বোনাস যোগ হয়েছে: " + bonus + " টাকা।");
+        }
+
+        function openDeposit() {
+            let method = prompt("পেমেন্ট মাধ্যম: বিকাশ না নগদ?");
+            let amount = prompt("কত টাকা পাঠিয়েছেন? (মেম্বারশিপ ফি: ৫০০ টাকা)");
+            if(amount >= 500) {
+                alert("ধন্যবাদ! আপনার পেমেন্ট ভেরিফাই হলে মেম্বারশিপ প্রিমিয়াম হয়ে যাবে।");
+                isPremium = true; 
+                document.getElementById('status-tag').innerText = "Premium Member";
+                document.getElementById('status-tag').style.background = "#F59E0B";
+                document.getElementById('member-type').innerText = "Premium";
+            }
+        }
+
+        function withdraw() {
+            if(balance < 1000) {
+                alert("দুঃখিত! সর্বনিম্ন ১০০০ টাকা প্রয়োজন। আপনার বর্তমান ব্যালেন্স: " + balance);
+            } else if(refers < 20) {
+                alert("উইথড্র শর্ত: আপনাকে কমপক্ষে ২০ জন সফল রেফার করতে হবে। আপনার রেফার: " + refers);
+            } else {
+                let wallet = prompt("বিকাশ/নগদ নম্বর দিন:");
+                if(wallet) alert("আপনার ১০০০ টাকা উত্তোলনের রিকোয়েস্ট গ্রহণ করা হয়েছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
+            }
+        }
     </script>
 </body>
 </html>
+
