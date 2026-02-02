@@ -13,37 +13,56 @@
         .channel-btn { background: #3B82F6; margin-bottom: 8px; }
         .done { background: #475569 !important; cursor: not-allowed; opacity: 0.7; }
         #ad-view { display:none; background: #000; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #10B981; }
-        .limit-text { font-size: 13px; color: #94A3B8; margin-top: 5px; }
+        
+        /* পেমেন্ট বক্স স্টাইল */
+        #payment-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1E293B; padding:20px; border-radius:15px; border:2px solid #F59E0B; width:85%; z-index:100; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .pay-input { width:90%; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:white; }
+        .red-alert { color: #EF4444; font-size: 12px; font-weight: bold; margin-top: 5px; }
     </style>
 </head>
 <body>
+
+    <div id="payment-modal">
+        <h3 style="color:#F59E0B;">Premium মেম্বারশিপ (৳১২৫)</h3>
+        <p style="font-size:14px;">নিচের যেকোনো নম্বরে ১২৫ টাকা পেমেন্ট করুন:</p>
+        <p style="background:#0F172A; padding:12px; border-radius:8px; font-size:13px; text-align: left; line-height: 1.6;">
+            <b>বিকাশ (Personal):</b> 01767269886<br>
+            <span class="red-alert">(শুধু সেন্ড মানি ও ক্যাশ ইন প্রযোজ্য)</span><br><br>
+            <b>নগদ (Personal):</b> 01960674406<br>
+            <span class="red-alert">(শুধু সেন্ড মানি ও ক্যাশ ইন প্রযোজ্য)</span>
+        </p>
+        <input type="text" id="trxid" class="pay-input" placeholder="Transaction ID (TrxID) দিন">
+        <button class="btn" style="background:#D946EF" onclick="submitPayment()">পেমেন্ট নিশ্চিত করুন</button>
+        <button class="btn" style="background:#64748b" onclick="closePay()">বন্ধ করুন</button>
+    </div>
+
     <div class="card balance-box">
         <p style="margin:0;">বর্তমান ব্যালেন্স</p>
         <h2 style="margin:5px 0; font-size: 32px;">৳ <span id="balance">0.00</span></h2>
         <p style="font-size:12px; opacity: 0.9;">রেফার: <span id="ref-count">0</span>/20 | <span id="status">Free Member</span></p>
-        <p class="limit-text">আজকের চ্যানেল টাস্ক বাকি: <b><span id="daily-limit">5</span>/5</b></p>
+        <p style="font-size:13px; color: #94A3B8; margin-top: 5px;">আজকের চ্যানেল টাস্ক বাকি: <b><span id="daily-limit">5</span>/5</b></p>
     </div>
 
     <div class="card">
         <h3 style="margin-top:0; color:#3B82F6;">চ্যানেল টাস্ক (প্রতিটি ৬০৳)</h3>
         <div id="channel-container">
-            <button id="ch1" class="btn channel-btn" onclick="joinChannel('ch1', 'https://t.me/TaskPulseNetwork')">চ্যানেল ১ জয়েন করুন (৬০৳)</button>
-            <button id="ch2" class="btn channel-btn" onclick="joinChannel('ch2', 'https://t.me/TaskPulseRewards')">চ্যানেল ২ জয়েন করুন (৬০৳)</button>
-            <button id="ch3" class="btn channel-btn" onclick="joinChannel('ch3', 'https://t.me/TaskPulseHub')">চ্যানেল ৩ জয়েন করুন (৬০৳)</button>
-            <button id="ch4" class="btn channel-btn" onclick="joinChannel('ch4', 'https://t.me/TaskPulseUpdates')">চ্যানেল ৪ জয়েন করুন (৬০৳)</button>
-            <button id="ch5" class="btn channel-btn" onclick="joinChannel('ch5', 'https://t.me/TaskPulseOfficial')">চ্যানেল ৫ জয়েন করুন (৬০৳)</button>
+            <button id="ch1" class="btn channel-btn" onclick="joinChannel('ch1', 'https://t.me/TaskPulseNetwork')">চ্যানেল ১ জয়েন (৬০৳)</button>
+            <button id="ch2" class="btn channel-btn" onclick="joinChannel('ch2', 'https://t.me/TaskPulseRewards')">চ্যানেল ২ জয়েন (৬০৳)</button>
+            <button id="ch3" class="btn channel-btn" onclick="joinChannel('ch3', 'https://t.me/TaskPulseHub')">চ্যানেল ৩ জয়েন (৬০৳)</button>
+            <button id="ch4" class="btn channel-btn" onclick="joinChannel('ch4', 'https://t.me/TaskPulseUpdates')">চ্যানেল ৪ জয়েন (৬০৳)</button>
+            <button id="ch5" class="btn channel-btn" onclick="joinChannel('ch5', 'https://t.me/TaskPulseOfficial')">চ্যানেল ৫ জয়েন (৬০৳)</button>
         </div>
     </div>
 
     <div class="card">
-        <h3 style="margin-top:0; color:#10B981;">বিজ্ঞাপন দেখে আয়</h3>
+        <h3 style="margin-top:0; color:#10B981;">বিজ্ঞাপন দেখে আয়</h3>
         <button class="btn" onclick="showRandomAd()">নতুন বিজ্ঞাপন দেখুন (১০-২০৳)</button>
-        <div id="ad-view">বিজ্ঞাপন প্রসেসিং হচ্ছে... ১০ সেকেন্ড অপেক্ষা করুন।</div>
+        <div id="ad-view">বিজ্ঞাপন লোড হচ্ছে... ১০ সেকেন্ড অপেক্ষা করুন।</div>
     </div>
 
     <div class="card">
         <button class="btn" style="background:#8B5CF6" onclick="copyRef()">রেফার লিঙ্ক কপি (৬০৳)</button>
-        <button class="btn" style="background:#F59E0B" onclick="deposit()">Premium মেম্বারশিপ (৳১২৫)</button>
+        <button class="btn" style="background:#F59E0B" onclick="deposit()">Premium নিন (৳১২৫)</button>
         <button class="btn" style="background:#EF4444" onclick="withdraw()">টাকা উত্তোলন (৳১০০০)</button>
     </div>
 
@@ -52,7 +71,6 @@
         let completedChannels = [];
         let dailyLimit = 5;
 
-        // আপনার দেওয়া ৫টি বিজ্ঞাপনের লিঙ্ক
         const adLinks = [
             'https://www.effectivegatecpm.com/gkuc93ff?key=b09bd5bc65008dce9df74f8353601f32',
             'https://www.effectivegatecpm.com/wq59t3tm?key=24c8d830aabc1dd7b096a9dad397aaa8',
@@ -69,14 +87,13 @@
 
         function joinChannel(id, link) {
             if (dailyLimit <= 0) {
-                alert("দুঃখিত! আজকের ৫টি চ্যানেলের লিমিট শেষ। কাল আবার চেষ্টা করুন।");
+                alert("আজকের ৫টি চ্যানেলের লিমিট শেষ!");
                 return;
             }
             if (completedChannels.includes(id)) {
-                alert("এই চ্যানেলের বোনাস আপনি ইতিমধ্যে নিয়ে নিয়েছেন!");
+                alert("এই বোনাস আপনি নিয়ে নিয়েছেন!");
                 return;
             }
-
             window.open(link, '_blank');
             setTimeout(() => {
                 balance += 60;
@@ -85,48 +102,49 @@
                 document.getElementById(id).classList.add('done');
                 document.getElementById(id).innerText = "সম্পন্ন (৬০৳)";
                 updateUI();
-                alert("অভিনন্দন! আপনার একাউন্টে ৬০ টাকা যোগ করা হয়েছে।");
+                alert("চ্যানেল বোনাস ৬০ টাকা যোগ হয়েছে!");
             }, 5000);
         }
 
         function showRandomAd() {
             let randomAd = adLinks[Math.floor(Math.random() * adLinks.length)];
             window.open(randomAd, '_blank');
-            
             document.getElementById('ad-view').style.display = 'block';
             setTimeout(() => {
                 let reward = isPremium ? 20 : 10;
                 balance += reward;
                 document.getElementById('ad-view').style.display = 'none';
                 updateUI();
-                alert("বিজ্ঞাপন সফল! আপনি " + reward + " টাকা বোনাস পেয়েছেন।");
+                alert("বিজ্ঞাপন বোনাস যোগ হয়েছে!");
             }, 10000);
         }
 
-        function copyRef() {
-            let botUsername = "taskpulse_form_bot"; // আপনার বটের নাম
-            let link = "https://t.me/" + botUsername + "?start=REF" + Math.floor(Math.random()*99999);
-            navigator.clipboard.writeText(link);
-            alert("আপনার রেফার লিঙ্ক কপি হয়েছে! বন্ধুকে পাঠিয়ে ৬০ টাকা আয় করুন।");
-            // ডেমো রেফারেল যোগ
-            refers++; balance += 60; updateUI();
+        function deposit() { document.getElementById('payment-modal').style.display = 'block'; }
+        function closePay() { document.getElementById('payment-modal').style.display = 'none'; }
+
+        function submitPayment() {
+            let trx = document.getElementById('trxid').value;
+            if(trx.length < 5) {
+                alert("সঠিক Transaction ID দিন!");
+            } else {
+                alert("আপনার TrxID সাবমিট করা হয়েছে। যাচাই শেষে প্রিমিয়াম একটিভ করা হবে।");
+                closePay();
+            }
         }
 
-        function deposit() {
-            if(confirm("প্রিমিয়াম মেম্বারশিপ ফি ১২৫ টাকা। আপনি কি পেমেন্ট করেছেন? (প্রিমিয়াম হলে অ্যাড ইনকাম ডাবল হবে)")) {
-                isPremium = true;
-                document.getElementById('status').innerText = "Premium Member";
-                updateUI();
-                alert("রিকোয়েস্ট সফল! এখন থেকে আপনার ইনকাম ডাবল হবে।");
-            }
+        function copyRef() {
+            let link = "https://t.me/taskpulse_form_bot?start=REF" + Math.floor(Math.random()*9999);
+            navigator.clipboard.writeText(link);
+            alert("আপনার রেফার লিঙ্ক কপি হয়েছে!");
+            refers++; balance += 60; updateUI();
         }
 
         function withdraw() {
             if(balance >= 1000 && refers >= 20) {
-                let phone = prompt("আপনার বিকাশ বা নগদ নম্বর দিন:");
-                if(phone) alert("৳" + balance + " উত্তোলনের রিকোয়েস্ট সফল হয়েছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
+                prompt("বিকাশ/নগদ নম্বর দিন:");
+                alert("উইথড্র রিকোয়েস্ট সফল! ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
             } else {
-                alert("উইথড্র শর্ত: ১০০০ টাকা ব্যালেন্স এবং কমপক্ষে ২০ জন রেফার লাগবে। আপনার বর্তমান রেফার: " + refers);
+                alert("উইথড্র শর্ত: ১০০০ টাকা এবং ২০ জন রেফার লাগবে।");
             }
         }
     </script>
